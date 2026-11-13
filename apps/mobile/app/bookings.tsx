@@ -2,7 +2,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, Text, View, Pressable, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '../lib/supabase';
-import { CANCELLABLE, SERVICES, STATUS_LABEL, type Booking } from '../lib/booking';
+import {
+  BOOKING_COLUMNS,
+  CANCELLABLE,
+  SERVICES,
+  STATUS_LABEL,
+  money,
+  openQuote,
+  type Booking,
+} from '../lib/booking';
 import { c, ui } from '../lib/theme';
 
 export default function Bookings() {
@@ -18,9 +26,7 @@ export default function Bookings() {
     if (!session.session) return;
     const { data, error } = await supabase
       .from('bookings')
-      .select(
-        'id, reference, service, status, pickup_address, destination_address, scheduled_at, created_at',
-      )
+      .select(BOOKING_COLUMNS)
       .order('created_at', { ascending: false });
     if (error) setError(error.message);
     else {
@@ -39,6 +45,13 @@ export default function Bookings() {
       supabase.removeChannel(channel);
     };
   }, [load]);
+
+  async function accept(quoteId: string) {
+    setError(null);
+    const { error } = await supabase.rpc('accept_quote', { p_quote_id: quoteId });
+    if (error) setError(error.message);
+    else load();
+  }
 
   async function cancel(id: string) {
     setError(null);
@@ -113,6 +126,38 @@ export default function Bookings() {
             {b.pickup_address}
             {b.destination_address ? ` → ${b.destination_address}` : ''}
           </Text>
+          {(() => {
+            const q = openQuote(b);
+            if (q) {
+              return (
+                <View
+                  style={{ marginTop: 14, backgroundColor: c.bg, borderRadius: 14, padding: 14 }}
+                >
+                  <Text style={{ color: c.text, fontWeight: '700' }}>
+                    Quote: {money(q.amount, q.currency)}
+                  </Text>
+                  <Text style={{ color: c.muted, fontSize: 12, marginTop: 4 }}>
+                    Valid until {new Date(q.valid_until).toLocaleDateString('en-ZA')}
+                  </Text>
+                  {q.notes ? <Text style={{ color: c.text, marginTop: 8 }}>{q.notes}</Text> : null}
+                  <Pressable
+                    style={[ui.cta, { marginTop: 12, padding: 12 }]}
+                    onPress={() => accept(q.id)}
+                  >
+                    <Text style={ui.ctaText}>Accept quote</Text>
+                  </Pressable>
+                </View>
+              );
+            }
+            if (b.final_price != null) {
+              return (
+                <Text style={{ color: c.text, fontWeight: '700', marginTop: 14 }}>
+                  Agreed price: {money(b.final_price)}
+                </Text>
+              );
+            }
+            return null;
+          })()}
           {CANCELLABLE.includes(b.status) && (
             <Pressable style={{ marginTop: 14 }} onPress={() => cancel(b.id)}>
               <Text style={[ui.link, { color: c.danger }]}>Cancel booking</Text>

@@ -3,7 +3,7 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { SERVICES, type Service } from '@/lib/booking';
+import { SERVICES, money, type Service, type SupplyItem } from '@/lib/booking';
 
 function BookForm() {
   const router = useRouter();
@@ -14,6 +14,12 @@ function BookForm() {
   const [destination, setDestination] = useState('');
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [items, setItems] = useState<SupplyItem[]>([]);
+  const [qty, setQty] = useState<Record<string, number>>({});
+  const [reg, setReg] = useState('');
+  const [make, setMake] = useState('');
+  const [model, setModel] = useState('');
+  const [runs, setRuns] = useState(true);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -24,11 +30,22 @@ function BookForm() {
       .then(({ data }) => setSignedIn(!!data.session));
   }, []);
 
+  useEffect(() => {
+    if (service !== 'supplies' || signedIn !== true) return;
+    createClient()
+      .from('supply_items')
+      .select('id, sku, name, price')
+      .eq('active', true)
+      .order('name')
+      .then(({ data }) => setItems((data as SupplyItem[] | null) ?? []));
+  }, [service, signedIn]);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await createClient()
+    const supabase = createClient();
+    const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
         service,
@@ -36,10 +53,42 @@ function BookForm() {
         destination_address: destination.trim() || null,
         scheduled_at: date ? new Date(date).toISOString() : null,
         notes: notes.trim() || null,
+      })
+      .select('id')
+      .single();
+    if (bookingError || !booking) {
+      setError(bookingError?.message ?? 'Could not create your booking');
+      setBusy(false);
+      return;
+    }
+
+    let followUpError: string | null = null;
+    if (service === 'supplies') {
+      const lines = Object.entries(qty)
+        .filter(([, n]) => n > 0)
+        .map(([item_id, quantity]) => ({ booking_id: booking.id, item_id, quantity }));
+      if (lines.length) {
+        const { error } = await supabase.from('booking_supply_items').insert(lines);
+        followUpError = error?.message ?? null;
+      }
+    } else if (service === 'towing') {
+      const { error } = await supabase.from('towing_details').insert({
+        booking_id: booking.id,
+        registration: reg.trim(),
+        vehicle_make: make.trim() || null,
+        vehicle_model: model.trim() || null,
+        vehicle_runs: runs,
       });
-    setBusy(false);
-    if (error) setError(error.message);
-    else router.push('/bookings');
+      followUpError = error?.message ?? null;
+    }
+
+    if (followUpError) {
+      await supabase.rpc('cancel_booking', { p_booking_id: booking.id });
+      setError(`${followUpError}. Your request was not sent, please try again.`);
+      setBusy(false);
+      return;
+    }
+    router.push('/bookings');
   }
 
   const field =
@@ -92,6 +141,71 @@ function BookForm() {
           className={field}
         />
       </label>
+
+      {service === 'supplies' && (
+        <fieldset className="rounded-2xl bg-white p-5">
+          <legend className="px-1 text-sm font-semibold">What do you need?</legend>
+          {items.length === 0 ? (
+            <p className="text-sm text-muted">
+              The supplies catalogue is not available yet. Describe what you need in the notes.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {items.map((it) => (
+                <li key={it.id} className="flex items-center justify-between gap-4">
+                  <span className="text-sm">
+                    {it.name} <span className="text-muted">{money(it.price)}</span>
+                  </span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={1000}
+                    aria-label={`Quantity of ${it.name}`}
+                    value={qty[it.id] ?? 0}
+                    onChange={(e) =>
+                      setQty({
+                        ...qty,
+                        [it.id]: Math.max(0, Math.floor(Number(e.target.value) || 0)),
+                      })
+                    }
+                    className="w-20 rounded-lg border border-navy/15 p-2 text-right"
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </fieldset>
+      )}
+
+      {service === 'towing' && (
+        <fieldset className="space-y-4 rounded-2xl bg-white p-5">
+          <legend className="px-1 text-sm font-semibold">Your vehicle</legend>
+          <label className="block text-sm font-semibold">
+            Registration
+            <input
+              required
+              value={reg}
+              onChange={(e) => setReg(e.target.value)}
+              className={field}
+            />
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <label className="block text-sm font-semibold">
+              Make
+              <input value={make} onChange={(e) => setMake(e.target.value)} className={field} />
+            </label>
+            <label className="block text-sm font-semibold">
+              Model
+              <input value={model} onChange={(e) => setModel(e.target.value)} className={field} />
+            </label>
+          </div>
+          <label className="flex items-center gap-3 text-sm font-semibold">
+            <input type="checkbox" checked={runs} onChange={(e) => setRuns(e.target.checked)} />
+            The vehicle starts and rolls
+          </label>
+        </fieldset>
+      )}
+
       <label className="block text-sm font-semibold">
         Preferred date
         <input
@@ -107,7 +221,7 @@ function BookForm() {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          placeholder="Home size, stairs, vehicle make and model…"
+          placeholder="Home size, stairs, anything we should know…"
           className={field}
         />
       </label>

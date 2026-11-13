@@ -2,7 +2,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { STATUS_LABEL, SERVICES, type Booking } from '@/lib/booking';
+import {
+  STATUS_LABEL,
+  SERVICES,
+  BOOKING_COLUMNS,
+  money,
+  openQuote,
+  type Booking,
+} from '@/lib/booking';
 
 const CANCELLABLE = ['requested', 'quoted', 'confirmed'];
 
@@ -18,9 +25,7 @@ export default function Bookings() {
     if (!session.session) return;
     const { data, error } = await supabase
       .from('bookings')
-      .select(
-        'id, reference, service, status, pickup_address, destination_address, scheduled_at, created_at',
-      )
+      .select(BOOKING_COLUMNS)
       .order('created_at', { ascending: false });
     if (error) setError(error.message);
     else setRows(data as Booking[]);
@@ -37,6 +42,13 @@ export default function Bookings() {
       supabase.removeChannel(channel);
     };
   }, [load]);
+
+  async function accept(quoteId: string) {
+    setError(null);
+    const { error } = await createClient().rpc('accept_quote', { p_quote_id: quoteId });
+    if (error) setError(error.message);
+    else load();
+  }
 
   async function cancel(id: string) {
     setError(null);
@@ -92,6 +104,32 @@ export default function Bookings() {
               {b.pickup_address}
               {b.destination_address ? ` → ${b.destination_address}` : ''}
             </p>
+            {(() => {
+              const q = openQuote(b);
+              if (q) {
+                return (
+                  <div className="mt-4 rounded-2xl bg-surface p-4">
+                    <p className="text-sm font-bold">Quote: {money(q.amount, q.currency)}</p>
+                    <p className="mt-1 text-xs text-muted">
+                      Valid until {new Date(q.valid_until).toLocaleDateString('en-ZA')}
+                    </p>
+                    {q.notes && <p className="mt-2 text-sm">{q.notes}</p>}
+                    <button
+                      onClick={() => accept(q.id)}
+                      className="mt-3 rounded-full bg-brand px-5 py-2 text-sm font-bold text-white"
+                    >
+                      Accept quote
+                    </button>
+                  </div>
+                );
+              }
+              if (b.final_price != null) {
+                return (
+                  <p className="mt-4 text-sm font-bold">Agreed price: {money(b.final_price)}</p>
+                );
+              }
+              return null;
+            })()}
             {CANCELLABLE.includes(b.status) && (
               <button onClick={() => cancel(b.id)} className="mt-4 text-sm font-bold text-brand">
                 Cancel booking
