@@ -1,11 +1,20 @@
 # Iverson Platform
 
-Cross-platform starter for the Iverson moving and transport service.
+A monorepo foundation for Iverson's moving and logistics platform.
 
-## Project source
+## Apps
+- `apps/web`: Next.js customer web app and operations dashboard foundation.
+- `apps/mobile`: Expo / React Native mobile app foundation.
+- `supabase/migrations`: database schema with row-level security.
 
-The initial starter project archive is committed as `iverson-platform-starter.zip` in this repository. Extract it to get the full monorepo structure for the Next.js web app, Expo mobile app, and Supabase migration.
+## Stack
+- Next.js + TypeScript + Tailwind (web)
+- Expo + React Native + TypeScript (mobile)
+- Supabase Auth, Postgres, Realtime, Storage (backend)
+
+## Start
+Install Node.js LTS and pnpm, then run `pnpm install`. Copy the `.env.example` files to the local env files, add your Supabase URL and publishable key, then run `pnpm dev:web` or `pnpm dev:mobile`.
+Never put a Supabase service-role key in either client app.
 
 ## Current scope
-
-This is a foundation, not a production-ready service. Authentication, persisted booking workflows, payments, driver assignment, live GPS tracking, notifications, and operations/admin tooling still need implementation and end-to-end verification.
+This is the clean project foundation and first usable UI shell. Live payments, driver GPS, push notifications, SMS OTP delivery, and production booking workflows require provider credentials and further implementation.
