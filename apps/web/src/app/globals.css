@@ -1,0 +1,3 @@
+@import "tailwindcss";
+:root{color-scheme:dark;--bg:#090b12;--panel:#121722;--muted:#8d98aa;--line:#252d3b;--accent:#d8ff62}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f5f7fb;font-family:Arial,Helvetica,sans-serif}
