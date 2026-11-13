@@ -6,3 +6,12 @@ build
 .env
 .env.local
 .DS_Store
+.env.*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+.turbo
+coverage
+ios
+android

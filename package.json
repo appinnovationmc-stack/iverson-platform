@@ -7,5 +7,16 @@
     "dev:mobile": "pnpm --filter @iverson/mobile start",
     "build:web": "pnpm --filter @iverson/web build",
     "typecheck": "pnpm -r typecheck"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0",
+      "@types/react": "~19.1.0",
+      "@types/react-dom": "~19.1.0"
+    }
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
