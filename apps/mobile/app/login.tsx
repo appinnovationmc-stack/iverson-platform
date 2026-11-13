@@ -35,31 +35,77 @@ export default function Login() {
     setBusy(false);
   }
 
-  const canSubmit = !busy && email.includes('@') && password.length >= 8 && (mode === 'signin' || fullName.trim().length > 0);
+  const canSubmit =
+    !busy &&
+    email.includes('@') &&
+    password.length >= 8 &&
+    (mode === 'signin' || fullName.trim().length > 0);
 
   return (
-    <ScrollView style={ui.page} contentContainerStyle={ui.content} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={ui.page}
+      contentContainerStyle={ui.content}
+      keyboardShouldPersistTaps="handled"
+    >
       <Pressable onPress={() => router.back()}>
         <Text style={ui.link}>← Back</Text>
       </Pressable>
-      <Text style={[ui.h1, { marginTop: 28 }]}>{mode === 'signin' ? 'Welcome back' : 'Create your account'}</Text>
+      <Text style={[ui.h1, { marginTop: 28 }]}>
+        {mode === 'signin' ? 'Welcome back' : 'Create your account'}
+      </Text>
       {mode === 'signup' && (
         <>
           <Text style={ui.label}>Full name</Text>
-          <TextInput style={ui.input} value={fullName} onChangeText={setFullName} autoComplete="name" placeholderTextColor={c.muted} />
+          <TextInput
+            style={ui.input}
+            value={fullName}
+            onChangeText={setFullName}
+            autoComplete="name"
+            placeholderTextColor={c.muted}
+          />
         </>
       )}
       <Text style={ui.label}>Email</Text>
-      <TextInput style={ui.input} value={email} onChangeText={setEmail} autoCapitalize="none" autoComplete="email" keyboardType="email-address" placeholderTextColor={c.muted} />
+      <TextInput
+        style={ui.input}
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        autoComplete="email"
+        keyboardType="email-address"
+        placeholderTextColor={c.muted}
+      />
       <Text style={ui.label}>Password (8+ characters)</Text>
-      <TextInput style={ui.input} value={password} onChangeText={setPassword} secureTextEntry autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} placeholderTextColor={c.muted} />
+      <TextInput
+        style={ui.input}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+        placeholderTextColor={c.muted}
+      />
       {error && <Text style={ui.error}>{error}</Text>}
       {notice && <Text style={[ui.copy, { color: c.accent }]}>{notice}</Text>}
-      <Pressable style={[ui.cta, !canSubmit && { opacity: 0.5 }]} disabled={!canSubmit} onPress={submit}>
-        {busy ? <ActivityIndicator color={c.accentText} /> : <Text style={ui.ctaText}>{mode === 'signin' ? 'Sign in' : 'Create account'}</Text>}
+      <Pressable
+        style={[ui.cta, !canSubmit && { opacity: 0.5 }]}
+        disabled={!canSubmit}
+        onPress={submit}
+      >
+        {busy ? (
+          <ActivityIndicator color={c.accentText} />
+        ) : (
+          <Text style={ui.ctaText}>{mode === 'signin' ? 'Sign in' : 'Create account'}</Text>
+        )}
       </Pressable>
-      <Pressable style={{ marginTop: 24 }} onPress={() => setMode(mode === 'signin' ? 'signup' : 'signin')}>
-        <Text style={ui.link}>{mode === 'signin' ? 'New to Iverson? Create an account' : 'Already have an account? Sign in'}</Text>
+      <Pressable
+        style={{ marginTop: 24 }}
+        onPress={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+      >
+        <Text style={ui.link}>
+          {mode === 'signin'
+            ? 'New to Iverson? Create an account'
+            : 'Already have an account? Sign in'}
+        </Text>
       </Pressable>
     </ScrollView>
   );

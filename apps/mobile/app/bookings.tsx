@@ -18,7 +18,9 @@ export default function Bookings() {
     if (!session.session) return;
     const { data, error } = await supabase
       .from('bookings')
-      .select('id, reference, service, status, pickup_address, destination_address, scheduled_at, created_at')
+      .select(
+        'id, reference, service, status, pickup_address, destination_address, scheduled_at, created_at',
+      )
       .order('created_at', { ascending: false });
     if (error) setError(error.message);
     else {
@@ -67,29 +69,54 @@ export default function Bookings() {
       }
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Pressable onPress={() => router.replace('/')}><Text style={ui.link}>← Home</Text></Pressable>
-        {signedIn && <Pressable onPress={signOut}><Text style={[ui.link, { color: c.muted }]}>Sign out</Text></Pressable>}
+        <Pressable onPress={() => router.replace('/')}>
+          <Text style={ui.link}>← Home</Text>
+        </Pressable>
+        {signedIn && (
+          <Pressable onPress={signOut}>
+            <Text style={[ui.link, { color: c.muted }]}>Sign out</Text>
+          </Pressable>
+        )}
       </View>
       <Text style={[ui.h1, { marginTop: 28, marginBottom: 20 }]}>My bookings</Text>
       {signedIn === false && (
-        <Pressable style={ui.cta} onPress={() => router.push('/login')}><Text style={ui.ctaText}>Sign in to see your bookings</Text></Pressable>
+        <Pressable style={ui.cta} onPress={() => router.push('/login')}>
+          <Text style={ui.ctaText}>Sign in to see your bookings</Text>
+        </Pressable>
       )}
       {error && <Text style={ui.error}>{error}</Text>}
       {rows && rows.length === 0 && (
-        <Pressable style={ui.cta} onPress={() => router.push('/book')}><Text style={ui.ctaText}>No bookings yet. Request a quote</Text></Pressable>
+        <Pressable style={ui.cta} onPress={() => router.push('/book')}>
+          <Text style={ui.ctaText}>No bookings yet. Request a quote</Text>
+        </Pressable>
       )}
       {rows?.map((b) => (
         <View key={b.id} style={ui.card}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+            }}
+          >
             <View>
               <Text style={{ color: c.muted, fontSize: 12, fontWeight: '700' }}>{b.reference}</Text>
-              <Text style={{ color: c.text, fontSize: 18, fontWeight: '700', marginTop: 4 }}>{SERVICES.find((s) => s.value === b.service)?.label}</Text>
+              <Text style={{ color: c.text, fontSize: 18, fontWeight: '700', marginTop: 4 }}>
+                {SERVICES.find((s) => s.value === b.service)?.label}
+              </Text>
             </View>
-            <Text style={{ color: c.accent, fontSize: 12, fontWeight: '800' }}>{STATUS_LABEL[b.status] ?? b.status}</Text>
+            <Text style={{ color: c.accent, fontSize: 12, fontWeight: '800' }}>
+              {STATUS_LABEL[b.status] ?? b.status}
+            </Text>
           </View>
-          <Text style={ui.copy}>{b.pickup_address}{b.destination_address ? ` → ${b.destination_address}` : ''}</Text>
+          <Text style={ui.copy}>
+            {b.pickup_address}
+            {b.destination_address ? ` → ${b.destination_address}` : ''}
+          </Text>
           {CANCELLABLE.includes(b.status) && (
-            <Pressable style={{ marginTop: 14 }} onPress={() => cancel(b.id)}><Text style={[ui.link, { color: c.danger }]}>Cancel booking</Text></Pressable>
+            <Pressable style={{ marginTop: 14 }} onPress={() => cancel(b.id)}>
+              <Text style={[ui.link, { color: c.danger }]}>Cancel booking</Text>
+            </Pressable>
           )}
         </View>
       ))}

@@ -6,7 +6,12 @@ import { c, ui } from '../lib/theme';
 
 const services = [
   { icon: '↗', title: 'Move home', desc: 'Plan your next move', service: 'moving' },
-  { icon: '▣', title: 'Moving supplies', desc: 'Boxes and packing essentials', service: 'supplies' },
+  {
+    icon: '▣',
+    title: 'Moving supplies',
+    desc: 'Boxes and packing essentials',
+    service: 'supplies',
+  },
   { icon: '⌁', title: 'Car towing', desc: 'Get help with your vehicle', service: 'towing' },
 ] as const;
 
@@ -61,7 +66,12 @@ export default function Home() {
 }
 
 const s = StyleSheet.create({
-  top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 58 },
+  top: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 58,
+  },
   brand: { color: 'white', fontSize: 21, fontWeight: '900', letterSpacing: 5 },
   eyebrow: { color: c.accent, fontSize: 10, fontWeight: '800', letterSpacing: 2 },
   hero: { color: 'white', fontSize: 43, fontWeight: '700', lineHeight: 48, marginTop: 14 },

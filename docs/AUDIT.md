@@ -1,6 +1,7 @@
 # Audit notes (commit 506ac71)
 
 Fixed on branch `fix/audit-foundation`:
+
 - Web build failure: react/react-dom version mismatch. Both apps now pin 19.1.0, with root overrides. Lockfile committed.
 - Customers could set price/status on bookings. Column-level grants now limit inserts and updates; cancelling goes through `cancel_booking()`.
 - Driver location trail visible forever. Customers now see only the last hour while the booking is active; `purge_driver_locations()` added for retention.

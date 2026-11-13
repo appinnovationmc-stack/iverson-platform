@@ -6,7 +6,11 @@
     "dev:web": "pnpm --filter @iverson/web dev",
     "dev:mobile": "pnpm --filter @iverson/mobile start",
     "build:web": "pnpm --filter @iverson/web build",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build:web"
   },
   "pnpm": {
     "overrides": {
@@ -18,5 +22,13 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9",
+    "eslint": "^9",
+    "eslint-plugin-react-hooks": "^5",
+    "globals": "^17.14.0",
+    "prettier": "^3",
+    "typescript-eslint": "^8"
   }
 }

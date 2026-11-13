@@ -12,6 +12,15 @@
   --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
-:root { color-scheme: light; }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--color-surface); color: var(--color-ink); font-family: var(--font-sans); }
+:root {
+  color-scheme: light;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}

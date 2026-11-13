@@ -19,31 +19,40 @@ function BookForm() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    createClient().auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    createClient()
+      .auth.getSession()
+      .then(({ data }) => setSignedIn(!!data.session));
   }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await createClient().from('bookings').insert({
-      service,
-      pickup_address: pickup.trim(),
-      destination_address: destination.trim() || null,
-      scheduled_at: date ? new Date(date).toISOString() : null,
-      notes: notes.trim() || null,
-    });
+    const { error } = await createClient()
+      .from('bookings')
+      .insert({
+        service,
+        pickup_address: pickup.trim(),
+        destination_address: destination.trim() || null,
+        scheduled_at: date ? new Date(date).toISOString() : null,
+        notes: notes.trim() || null,
+      });
     setBusy(false);
     if (error) setError(error.message);
     else router.push('/bookings');
   }
 
-  const field = 'mt-2 w-full rounded-xl border border-navy/15 bg-white p-4 outline-none focus:border-brand';
+  const field =
+    'mt-2 w-full rounded-xl border border-navy/15 bg-white p-4 outline-none focus:border-brand';
 
   if (signedIn === false) {
     return (
       <p className="mt-10 rounded-2xl bg-white p-6">
-        Please <Link href="/login" className="font-bold text-brand">sign in</Link> to request a booking.
+        Please{' '}
+        <Link href="/login" className="font-bold text-brand">
+          sign in
+        </Link>{' '}
+        to request a booking.
       </p>
     );
   }
@@ -52,28 +61,65 @@ function BookForm() {
     <form onSubmit={submit} className="mt-10 space-y-6">
       <label className="block text-sm font-semibold">
         Service
-        <select value={service} onChange={(e) => setService(e.target.value as Service)} className={field}>
-          {SERVICES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+        <select
+          value={service}
+          onChange={(e) => setService(e.target.value as Service)}
+          className={field}
+        >
+          {SERVICES.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
         </select>
       </label>
       <label className="block text-sm font-semibold">
         {service === 'towing' ? 'Vehicle is at' : 'Pick-up address'}
-        <input required value={pickup} onChange={(e) => setPickup(e.target.value)} placeholder="Street, suburb, city" className={field} />
+        <input
+          required
+          value={pickup}
+          onChange={(e) => setPickup(e.target.value)}
+          placeholder="Street, suburb, city"
+          className={field}
+        />
       </label>
       <label className="block text-sm font-semibold">
         {service === 'supplies' ? 'Delivery address' : 'Drop-off address'}
-        <input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Street, suburb, city" className={field} />
+        <input
+          value={destination}
+          onChange={(e) => setDestination(e.target.value)}
+          placeholder="Street, suburb, city"
+          className={field}
+        />
       </label>
       <label className="block text-sm font-semibold">
         Preferred date
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={field} />
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className={field}
+        />
       </label>
       <label className="block text-sm font-semibold">
         Notes
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Home size, stairs, vehicle make and model…" className={field} />
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
+          placeholder="Home size, stairs, vehicle make and model…"
+          className={field}
+        />
       </label>
-      {error && <p role="alert" className="text-sm font-semibold text-red-700">{error}</p>}
-      <button disabled={busy || signedIn === null} className="rounded-full bg-brand px-8 py-3 font-bold text-white disabled:opacity-60">
+      {error && (
+        <p role="alert" className="text-sm font-semibold text-red-700">
+          {error}
+        </p>
+      )}
+      <button
+        disabled={busy || signedIn === null}
+        className="rounded-full bg-brand px-8 py-3 font-bold text-white disabled:opacity-60"
+      >
         {busy ? 'Sending…' : 'Request a quote'}
       </button>
     </form>
