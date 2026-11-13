@@ -1,0 +1,11 @@
+{
+  "name": "iverson-platform",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev:web": "pnpm --filter @iverson/web dev",
+    "dev:mobile": "pnpm --filter @iverson/mobile start",
+    "build:web": "pnpm --filter @iverson/web build",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
