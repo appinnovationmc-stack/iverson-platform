@@ -48,6 +48,9 @@ select t.expect_fail('other customer cannot add lines to my booking', format($$i
 
 -- Staff issue a quote
 select set_config('request.jwt.claim.sub', :s2, false);
+select t.expect_eq('staff sees supply lines', (select count(*) from public.booking_supply_items)::text, '1');
+select t.expect_eq('staff sees towing details', (select count(*) from public.towing_details)::text, '1');
+select t.expect_eq('staff sees inactive catalogue items too', (select count(*) from public.supply_items)::text, '3');
 select t.expect_fail('quote amount must be positive', format($$select public.issue_quote(%L, 0)$$, :'sup'));
 select t.expect_fail('quote validity must be in the future', format($$select public.issue_quote(%L, 500, now() - interval '1 day')$$, :'sup'));
 select t.expect_ok('staff can issue a quote', format($$select public.issue_quote(%L, 1500, now() + interval '3 days', 'incl. delivery')$$, :'sup'));

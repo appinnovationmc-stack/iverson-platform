@@ -6,10 +6,20 @@ import { createClient } from '@/lib/supabase/client';
 export default function Header() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
+  const [isStaff, setIsStaff] = useState(false);
+
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
+    const check = async (signed: boolean) => {
+      setSignedIn(signed);
+      if (!signed) return setIsStaff(false);
+      const { data } = await supabase.rpc('is_staff');
+      setIsStaff(data === true);
+    };
+    supabase.auth.getSession().then(({ data }) => check(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setTimeout(() => void check(!!session), 0);
+    });
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -30,6 +40,11 @@ export default function Header() {
           </Link>
           {signedIn ? (
             <>
+              {isStaff && (
+                <Link href="/staff" className="px-3 py-2">
+                  Staff
+                </Link>
+              )}
               <Link href="/bookings" className="px-3 py-2">
                 My bookings
               </Link>
