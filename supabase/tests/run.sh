@@ -14,3 +14,4 @@ for f in $(ls "$here"/../migrations/*.sql | sort); do
   psql "$url" -v ON_ERROR_STOP=1 -q -1 -f "$f"
 done
 psql "$url" -v ON_ERROR_STOP=1 -q -f "$here/rls.sql"
+psql "$url" -v ON_ERROR_STOP=1 -q -f "$here/quotes.sql"
