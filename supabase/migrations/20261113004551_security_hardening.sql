@@ -55,7 +55,7 @@ revoke execute on function public.cancel_booking(uuid) from public, anon;
 grant execute on function public.cancel_booking(uuid) to authenticated;
 
 -- 4. Triggers -------------------------------------------------------------
-create function public.touch_updated_at() returns trigger language plpgsql as $$
+create function public.touch_updated_at() returns trigger language plpgsql set search_path = '' as $$
 begin new.updated_at = now(); return new; end $$;
 create trigger profiles_touch before update on public.profiles for each row execute function public.touch_updated_at();
 create trigger bookings_touch before update on public.bookings for each row execute function public.touch_updated_at();

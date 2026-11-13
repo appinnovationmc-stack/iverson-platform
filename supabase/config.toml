@@ -1,0 +1,16 @@
+project_id = "iverson-platform"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+
+[db]
+major_version = 17
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback", "iverson://"]
+enable_signup = true
+
+[auth.email]
+enable_confirmations = true
